@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:ui="http://xmlns.jcp.org/jsf/facelets" 
+xmlns:h="http://xmlns.jcp.org/jsf/html" 
+xmlns:f="http://xmlns.jcp.org/jsf/core"
+xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+
+</h:head>
+<h:body>
+   <br/>
+   <h:form>
+   		<p:commandButton value="Dodaj Autora"   actionListener="#{authorService.prepareNewAuthor()}"  oncomplete="PF('authorDialog').show()"></p:commandButton>
+   		<br/>
+   		<br/>
+   		<p:inputText  placeholder="Traži autora..." value="#{authorService.searchAuthor}"  >
+   		<p:ajax rendered="authorsTable"></p:ajax>
+   		</p:inputText>
+   		<p:commandButton  value="Traži"   update="authorsTable"></p:commandButton>
+   		 
+   </h:form>
+   
+   <br/>
+  
+    <p:dialog widgetVar="authorDialog" closeOnEscape="true" modal="true" header="Dodaj Autora">
+    	<h:form id="authorsForm">
+	       <h:outputLabel value="Ime autora: ">
+	           <h:inputText id="todo" value="#{authorService.authorToEdit.authorName}" required="true" requiredMessage="Unesi ime autora"/>
+	           <h:message for="todo" ></h:message>
+	       </h:outputLabel>
+	       <br/>
+	       <br/>
+	       <p:commandButton  value="Dodaj Autora" action="#{authorService.addAuthor()}" update="authorsForm, :authorsTable" oncomplete="PF('authorDialog').hide();"/>
+	       <p:commandButton value="Zatvori" onclick="PF('authorDialog').hide();"></p:commandButton>
+	     </h:form>
+	 </p:dialog>
+         
+        <p:dataTable id="authorsTable" value="#{authorService.authorsList}" 
+         var="author" emptyMessage="Nisu pronađeni traženi podaci" 
+         resizableColumns="true"  paginator="true" rows="5" filteredValue="#{authorService.filterAuthorName()}" widgetVar="employeeWidget">
+            
+            <p:column   headerText="Autori" > 
+                <h:outputText value="#{author.authorName}"/>
+            </p:column>
+            
+             <p:column headerText="Operations">
+             	<h:form>
+             	 	<p:commandButton value="Uredi" action="#{authorService.setAuthorToEdit(author)}" update="editAuthorsForm" oncomplete="PF('editAuthor').show()"/>
+             	 	
+             	 	<p:commandButton action="#{authorService.deleteAuthor(author)}" value="Obriši"  update="authorsTable" >
+             	 		<p:confirm  message="Jeste li sigurni?" icon="pi pi-exclamation-triangle" />    
+             	 		<p:growl id="growl" showDetail="true" sticky="true" />    
+             	 	</p:commandButton>
+             	</h:form>
+  			</p:column>
+          
+        </p:dataTable>
+        
+        <p:dialog widgetVar="editAuthor" closeOnEscape="true" modal="true" header="Izmjeni Autora">
+    	<h:form id="editAuthorsForm">
+	    
+	       <h:outputLabel value="Ime autora: ">
+	           <h:inputText id="todo" value="#{authorService.authorToEdit.authorName}" required="true" requiredMessage="Unesi ime autora" />       
+	       </h:outputLabel>
+	       <br/>
+	       <br/>
+	       <p:commandButton value="Spremi Autora" action="#{authorService.updateAuthor()}" update="authorsForm, :authorsTable" oncomplete="PF('editAuthor').hide();" />
+	       <p:commandButton value="Zatvori" onclick="PF('editAuthor').hide();"></p:commandButton>
+	      
+	     </h:form>
+	 </p:dialog>
+      
+   <h:form>
+   		<p:confirmDialog global="true">
+        	<p:commandButton value="Da" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+        	<p:commandButton value="Ne" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+    	</p:confirmDialog> 
+   </h:form>
+		     		      
+</h:body>   
+</html>

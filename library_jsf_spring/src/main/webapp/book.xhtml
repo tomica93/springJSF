@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" 
+xmlns:ui="http://xmlns.jcp.org/jsf/facelets" 
+xmlns:h="http://xmlns.jcp.org/jsf/html" 
+xmlns:f="http://xmlns.jcp.org/jsf/core"
+xmlns:p="http://primefaces.org/ui">
+<h:head>
+
+</h:head>
+	
+	<body>
+	<br/>
+    <h:form>
+    	 <p:commandButton value="Dodaj Knjigu" update="createBookForm" actionListener="#{bookManager.prepareNewBook()}" oncomplete="PF('bookAddDialog').show()"></p:commandButton>
+    	 <br/>
+    	 <br/>
+    	 <p:inputText  placeholder="Traži..." value="#{bookManager.bookName}">
+    	 <p:ajax rendered="booksTable"></p:ajax>
+   		</p:inputText>
+   	     <p:commandButton  value="Traži" update="booksTable" >
+   	     </p:commandButton>
+    </h:form>
+	</body>
+    
+<h:body>
+
+    <br/>
+        <p:dataTable id="booksTable" value="#{bookManager.book}"  var="book" paginator="true" rows="5"
+       filteredValue="#{bookManager.searchBooksTable()}"  styleClass="book-table">
+
+            <p:column headerText="Knjiga">
+                <h:outputText value="#{book.bookName}" />
+            </p:column>
+            <p:column headerText="Kategorija">
+            	<h:outputText value="#{book.category}" />
+            </p:column>
+           		 <p:column headerText="Jezik">
+          		  <h:outputText value="#{book.language}" />
+            </p:column>
+            <p:column headerText="Autor">
+          		  <h:outputText value="#{book.author.authorName}" />
+            </p:column>
+           
+           <p:column headerText="Operations">
+             	<h:form>
+           
+                <p:commandButton  value="Update" class="btn btn-danger" action="#{bookManager.setBookToEdit(book)}" update="editBookForm" oncomplete="PF('bookEditDialog').show()" >
+                </p:commandButton>
+
+            <p:column headerText="Delete">
+		   		 <p:commandButton action="#{bookManager.deleteBook(book)}" value="Delete" class="btn btn-danger" update="booksTable" >
+		   		 <p:growl id="growl" showDetail="true" sticky="true" />    
+		   		 <p:confirm  message="Jeste li sigurni?" icon="pi pi-exclamation-triangle" />
+            	 </p:commandButton>
+            </p:column>
+				
+				</h:form>
+			</p:column>
+        </p:dataTable>
+
+    <p:dialog widgetVar="bookAddDialog" closeOnEscape="true" modal="true" header="Dodaj Knjigu">
+    	
+    	 <h:form id="createBookForm" class="form-horizontal">
+        <div class="form-group">
+            <div class="col-sm-4"></div>
+        </div>
+        <br/>
+        <div class="form-group">
+            <h:outputLabel for="book-name" class="control-label col-sm-4">Naziv Knjige:</h:outputLabel>
+            <div class="col-sm-4">
+                <h:inputText id="name-id" value="#{bookManager.bookToEdit.bookName}" class="form-control" validatorMessage="Potrebo je unijeti naziv knjige">
+                    <f:validateRequired />
+                </h:inputText>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <h:outputLabel for="kategorija" class="control-label col-sm-4">Kategorija:</h:outputLabel>
+            <div class="col-sm-4">
+                <h:inputText id="kategorija" value="#{bookManager.bookToEdit.category}" class="form-control" validatorMessage="Potrebno je unijeti kategoriju">
+                    <f:validateRequired/>
+                </h:inputText>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <h:outputLabel for="jezik" class="control-label col-sm-4">Jezik:</h:outputLabel>
+            <div class="col-sm-4">
+                <h:inputText id="jezik" value="#{bookManager.bookToEdit.language}" class="form-control" validatorMessage="Potrebno je unijeti jezik">
+                    <f:validateRequired/>
+                </h:inputText>
+            </div>
+        </div>
+        <br/>
+        <div class="form-group">
+        	<h:outputLabel class="control-label col-sm-4">Odaberi Autora:</h:outputLabel>
+        	<div class="col-sm-4">
+	<p:selectOneMenu value="#{bookManager.bookToEditAuthorsId}" required="true" requiredMessage="Potrebno je odabrati autora." >
+						<p:ajax event="valueChange" update="@this"></p:ajax>
+						
+						<f:selectItem itemValue="#{null}" itemLabel="-- odaberi --" />
+						<f:selectItems value="#{authorService.authorsList}" var="a" itemLabel="#{a.authorName}" itemValue="#{a.id}" />
+					</p:selectOneMenu>
+      	  	</div>
+        </div>
+
+        <br/>
+        
+       <div class="form-group">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <div class="col-sm-2">
+                    <p:commandButton value="Spremi" action="#{bookManager.addBook()}" class="btn btn-success btnWidth" oncomplete="PF('bookAddDialog').hide()" update="@(.book-table)"  />
+                    <p:commandButton value="Zatvori" action="#{bookManager.clear()}" onclick="PF('bookAddDialog').hide();"></p:commandButton>
+                </div>
+                <div class="col-sm-1">
+                </div>
+            </div>
+        </div>
+    </h:form>
+    
+    </p:dialog>
+
+<p:dialog widgetVar="bookEditDialog" closeOnEscape="true" modal="true" header="Izmjeni">
+	<h:form id="editBookForm" class="form-horizontal">
+        <div class="form-group">
+            <div class="col-sm-4"></div>
+        </div>
+        <br/>
+        <div class="form-group">
+            <h:outputLabel for="book-name" class="control-label col-sm-4">Naziv Knjige:</h:outputLabel>
+            <div class="col-sm-4">
+                <h:inputText id="name-id" value="#{bookManager.bookToEdit.bookName}" class="form-control" validatorMessage="Potrebo je unijeti naziv knjige">
+                    <f:validateRequired />
+                </h:inputText>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <h:outputLabel for="kategorija" class="control-label col-sm-4">Kategorija:</h:outputLabel>
+            <div class="col-sm-4">
+                <h:inputText id="kategorija" value="#{bookManager.bookToEdit.category}" class="form-control" validatorMessage="Potrebno je unijeti kategoriju">
+                    <f:validateRequired/>
+                </h:inputText>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <h:outputLabel for="jezik" class="control-label col-sm-4">Jezik:</h:outputLabel>
+            <div class="col-sm-4">
+                <h:inputText id="jezik" value="#{bookManager.bookToEdit.language}" class="form-control" validatorMessage="Potrebno je unijeti jezik">
+                    <f:validateRequired/>
+                </h:inputText>
+            </div>
+        </div>
+        <br/>
+        <div class="form-group">
+        	<h:outputLabel class="control-label col-sm-4">Odaberi Autora:</h:outputLabel>
+        	<div class="col-sm-4">
+        	        <p:selectOneMenu value="#{bookManager.bookToEditAuthorsId}" required="true" requiredMessage="Potrebno je odabrati autora." >
+						<p:ajax event="valueChange" update="@this"></p:ajax>
+						
+						<f:selectItem itemValue="#{null}" itemLabel="-- odaberi --" />
+						<f:selectItems value="#{authorService.authorsList}" var="a" itemLabel="#{a.authorName}" itemValue="#{a.id}" />
+					</p:selectOneMenu>
+      	  	</div>
+        </div>
+
+        <br/>
+        
+       <div class="form-group">
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <div class="col-sm-2">
+                    <p:commandButton value="Spremi" action="#{bookManager.editBook()}" class="btn btn-success btnWidth" oncomplete="PF('bookEditDialog').hide()" update="booksTable"  />
+                    <p:commandButton value="Zatvori" action="#{bookManager.clear()}" onclick="PF('bookEditDialog').hide();"></p:commandButton>
+                </div>
+                <div class="col-sm-1">
+                </div>
+            </div>
+        </div>
+    </h:form>
+	 </p:dialog>	
+	    
+	<h:form>
+   		<p:confirmDialog global="true">
+        	<p:commandButton value="Da" type="button" styleClass="ui-confirmdialog-yes" icon="pi pi-check" />
+        	<p:commandButton value="Ne" type="button" styleClass="ui-confirmdialog-no" icon="pi pi-times" />
+    	</p:confirmDialog> 
+   </h:form>
+   
+</h:body>
+  
+</html>
